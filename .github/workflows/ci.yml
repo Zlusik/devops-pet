@@ -8,35 +8,36 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Lint
         run: npm run lint
-
       - name: Test
         run: npm test
 
   build:
     needs: lint-and-test
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       packages: write
-
     steps:
       - uses: actions/checkout@v4
+
+      # Эмулятор для сборки ARM-образов на x86-раннере
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Настройка Buildx (нужен для мульти-архитектурной сборки)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Lowercase repository name
         run: echo "IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
@@ -53,4 +54,6 @@ jobs:
         with:
           context: .
           push: true
+          # Собираем сразу под две архитектуры
+          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
