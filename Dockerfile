@@ -1,5 +1,7 @@
 FROM node:20-alpine3.21
 
+RUN npm install -g npm@latest
+
 WORKDIR /app
 
 COPY package*.json ./
