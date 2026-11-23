@@ -3,11 +3,10 @@ FROM node:20-alpine3.21
 WORKDIR /app
 
 COPY package*.json ./
-# Устанавливаем зависимости
 RUN npm ci --omit=dev
 
-# ПРИНУДИТЕЛЬНО обновляем уязвимый tar до безопасной версии
-RUN npm install tar@7.5.21 --no-save
+# Удаляем npm, чтобы Trivy не находил уязвимости во встроенных зависимостях npm
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 COPY src/ ./src/
 
