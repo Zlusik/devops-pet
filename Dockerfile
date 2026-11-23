@@ -1,6 +1,10 @@
-FROM node:20-alpine3.21
+FROM node:20-alpine
 
+# Переключаемся на root, чтобы обновить npm
+USER root
 RUN npm install -g npm@latest
+# Возвращаем пользователя node для безопасности (как было в оригинальном образе)
+USER node
 
 WORKDIR /app
 
