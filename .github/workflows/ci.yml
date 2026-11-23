@@ -57,3 +57,11 @@ jobs:
           # Собираем сразу под две архитектуры
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
