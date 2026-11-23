@@ -14,4 +14,9 @@ app.get("/hello", (req, res) => {
   res.json({message: "Hello from DevOps pipeline!"});
 });
 
+app.get("/check", (req, res) => {
+  res.json({message: "check new endpoint. Hellow new best world"});
+});
+
+
 module.exports = app;
