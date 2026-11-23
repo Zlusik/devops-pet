@@ -1,19 +1,15 @@
-FROM node:20-alpine
-
-# Переключаемся на root, чтобы обновить npm
-USER root
-RUN npm install -g npm@latest
-# Возвращаем пользователя node для безопасности (как было в оригинальном образе)
-USER node
+FROM node:20-alpine3.21
 
 WORKDIR /app
 
 COPY package*.json ./
+# Устанавливаем зависимости
 RUN npm ci --omit=dev
 
-COPY src/ ./src/
+# ПРИНУДИТЕЛЬНО обновляем уязвимый tar до безопасной версии
+RUN npm install tar@7.5.21 --no-save
 
-USER node
+COPY src/ ./src/
 
 EXPOSE 3000
 
