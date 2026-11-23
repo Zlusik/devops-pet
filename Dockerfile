@@ -1,5 +1,8 @@
 FROM node:20-alpine3.21
 
+# Обновляем системные пакеты Alpine (лечит musl, zlib и другие)
+RUN apk update && apk upgrade --no-cache
+
 WORKDIR /app
 
 COPY package*.json ./
