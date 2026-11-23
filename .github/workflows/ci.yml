@@ -17,6 +17,8 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
+      - name: Security Audit
+        run: npm audit --audit-level=high
       - name: Lint
         run: npm run lint
       - name: Test
@@ -49,14 +51,31 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build image locally
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'ghcr.io/${{ env.IMAGE_NAME }}:latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push image to GHCR
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          # Собираем сразу под две архитектуры
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
